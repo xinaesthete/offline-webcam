@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Offline Webcam</title>
+    <script type="text/javascript">
+      async function chooseDevice(deviceId) {
+        console.log('chooseDevice ' + deviceId);
+        const stream = await navigator.mediaDevices.getUserMedia({video: {deviceId: deviceId}});
+        const vidEl = document.querySelector('video');
+        vidEl.srcObject = stream;
+        vidEl.onloadedmetadata = () => vidEl.play();
+      }
+      (async function() {
+        await navigator.mediaDevices.getUserMedia({video: true});
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const selectEl = document.getElementById('devices');
+        let first = true;
+        devices.forEach(dev => {
+          if (!dev.kind.includes('video')) return;
+          if (first) {
+            chooseDevice(dev.deviceId);
+            first = false;
+          }
+          const el = document.createElement('option', {value: dev.deviceId});
+          el.innerText = dev.label;
+          selectEl.appendChild(el);
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <label for="devices">Choose a video device:</label>
+    <select name="devices" id="devices" onchange="chooseDevice(this.value)"></select>
+    <video id="vidOutput" muted style="display: block; width: 100%"></video>
+  </body>
+</html>
