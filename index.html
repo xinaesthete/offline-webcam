@@ -3,6 +3,11 @@
   <head>
     <title>Offline Webcam</title>
     <script type="text/javascript">
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      } else {
+        alert('this will probably not work offline in this browser');
+      }
       async function chooseDevice(deviceId) {
         console.log('chooseDevice ' + deviceId);
         const stream = await navigator.mediaDevices.getUserMedia({video: {deviceId: deviceId}});
