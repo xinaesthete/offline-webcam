@@ -1,4 +1,4 @@
-const cacheName = 'test1';
+const cacheName = 'test2';
 self.addEventListener('install', (e) => {
   const files = ['/index.html', './'];
   e.awaitUntil((async () => {
@@ -9,12 +9,14 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('fetch', (e) => {
   e.respondWith((async () => {
-    const r = await caches.match(e.request);
-    if (r) return r;
-    console.log('cache miss, fetching from network');
-    const response = await fetch(e.request);
-    const cache = await caches.open(cacheName);
-    cache.put(e.request, response.clone());
-    return response;
+    try {
+      const response = await fetch(e.request);
+      console.log('fetched from network, adding to cache');
+      cache.put(e.request, response.clone());
+      return response;
+    } catch (err) {
+      console.log('network failed, retrieve from cache');
+      return await caches.match(e.request);
+    }
   })());
 });

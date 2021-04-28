@@ -10,10 +10,16 @@
       }
       async function chooseDevice(deviceId) {
         console.log('chooseDevice ' + deviceId);
-        const stream = await navigator.mediaDevices.getUserMedia({video: {deviceId: deviceId}});
-        const vidEl = document.querySelector('video');
-        vidEl.srcObject = stream;
-        vidEl.onloadedmetadata = () => vidEl.play();
+        try {
+          //see https://webrtc.github.io/samples/src/content/devices/input-output/
+          const stream = await navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: deviceId}}});
+          console.log(`setting stream id ${stream.id}, 1st video track: ${stream.getVideoTracks()[0].label}`);
+          const vidEl = document.querySelector('video');
+          vidEl.srcObject = stream;
+          vidEl.onloadedmetadata = () => vidEl.play();
+        } catch (err) {
+          console.error(err);
+        }
       }
       (async function() {
         await navigator.mediaDevices.getUserMedia({video: true});
@@ -23,10 +29,13 @@
         devices.forEach(dev => {
           if (!dev.kind.includes('video')) return;
           if (first) {
+            console.log('opening default device.');
             chooseDevice(dev.deviceId);
             first = false;
           }
-          const el = document.createElement('option', {value: dev.deviceId});
+          console.log(`adding option ${dev.label}: ${dev.deviceId}`);
+          const el = document.createElement('option');
+          el.value = dev.deviceId;
           el.innerText = dev.label;
           selectEl.appendChild(el);
         });
