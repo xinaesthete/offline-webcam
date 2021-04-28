@@ -12,6 +12,7 @@ self.addEventListener('fetch', (e) => {
     try {
       const response = await fetch(e.request);
       console.log('fetched from network, adding to cache');
+      const cache = await caches.open(cacheName);
       cache.put(e.request, response.clone());
       return response;
     } catch (err) {
